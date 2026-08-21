@@ -26,3 +26,8 @@ st.write(X.shape)
 
 st.write("Target (y):")
 st.write(y.shape)
+st.subheader("Missing Values")
+
+missing_values = df.isnull().sum()
+
+st.write(missing_values)
