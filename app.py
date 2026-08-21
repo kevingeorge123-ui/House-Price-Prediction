@@ -31,3 +31,11 @@ st.subheader("Missing Values")
 missing_values = df.isnull().sum()
 
 st.write(missing_values)
+
+numeric_columns = X.select_dtypes(include=["number"]).columns
+categorical_columns = X.select_dtypes(include=["object"]).columns
+
+st.subheader("Data Types")
+
+st.write("Numerical columns:", len(numeric_columns))
+st.write("Categorical columns:", len(categorical_columns))
