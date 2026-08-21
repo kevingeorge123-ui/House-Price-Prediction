@@ -14,3 +14,11 @@ st.write("Number of rows:", df.shape[0])
 st.write("Number of columns:", df.shape[1])
 
 st.dataframe(df.head())
+
+st.subheader("Dataset Information")
+
+st.write("Target column: SalePrice")
+
+st.write("Columns in the dataset:")
+
+st.write(df.columns.tolist())
