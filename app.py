@@ -1,5 +1,10 @@
 import streamlit as st
 import pandas as pd
+from sklearn.impute import SimpleImputer
+
+numeric_imputer = SimpleImputer(strategy="median")
+
+categorical_imputer = SimpleImputer(strategy="most_frequent")
 
 st.title("Kevin C George - House Price Prediction")
 
