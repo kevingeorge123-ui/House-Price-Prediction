@@ -40,7 +40,6 @@ print(df.isnull().sum())
 
 X = df.drop("SalePrice", axis=1)
 
-st.write(X.columns.tolist())
 
 y = df["SalePrice"]
 
