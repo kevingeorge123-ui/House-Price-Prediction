@@ -1,80 +1,60 @@
+# ==========================================
+# 1. IMPORT LIBRARIES
+# ==========================================
+
 import streamlit as st
 import pandas as pd
 
-from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
-# -----------------------------
-# Streamlit Title
-# -----------------------------
-
-st.title("Kevin C George - House Price Prediction")
-
-st.write("Welcome to my first Machine Learning Streamlit project!")
-
-
-# -----------------------------
-# Load Dataset
-# -----------------------------
+# ==========================================
+# 2. LOAD DATA
+# ==========================================
 
 df = pd.read_csv("train.csv")
 
 
-st.subheader("House Price Dataset")
+# ==========================================
+# 3. UNDERSTAND THE DATA
+# ==========================================
 
-st.write("Number of rows:", df.shape[0])
-st.write("Number of columns:", df.shape[1])
+print(df.head())
+print(df.shape)
+print(df.info())
+print(df.describe())
+
+print(df.isnull().sum())
 
 
-# -----------------------------
-# Features and Target
-# -----------------------------
+# ==========================================
+# 4. SEPARATE FEATURES AND TARGET
+# ==========================================
 
 X = df.drop("SalePrice", axis=1)
 
 y = df["SalePrice"]
 
 
-st.subheader("Machine Learning Data")
-
-st.write("Features (X):")
-st.write(X.shape)
-
-st.write("Target (y):")
-st.write(y.shape)
-
-
-# -----------------------------
-# Missing Values
-# -----------------------------
-
-st.subheader("Missing Values")
-
-missing_values = df.isnull().sum()
-
-st.write(missing_values)
-
-
-# -----------------------------
-# Data Types
-# -----------------------------
+# ==========================================
+# 5. IDENTIFY NUMERICAL AND CATEGORICAL
+# ==========================================
 
 numeric_columns = X.select_dtypes(include=["number"]).columns
 
 categorical_columns = X.select_dtypes(include=["object"]).columns
 
 
-st.subheader("Data Types")
-
-st.write("Numerical columns:", len(numeric_columns))
-
-st.write("Categorical columns:", len(categorical_columns))
-
-
-# -----------------------------
-# Train/Test Split
-# -----------------------------
+# ==========================================
+# 6. SPLIT DATA
+# ==========================================
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -84,17 +64,81 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 
-st.subheader("Train/Test Split")
+# ==========================================
+# 7. HANDLE MISSING VALUES + CATEGORIES
+# ==========================================
 
-st.write("Training rows:", X_train.shape[0])
+numeric_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="median"))
+])
 
-st.write("Testing rows:", X_test.shape[0])
+categorical_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("encoder", OneHotEncoder(handle_unknown="ignore"))
+])
 
 
-# -----------------------------
-# Imputers
-# -----------------------------
+# ==========================================
+# 8. COMBINE THE PROCESSING
+# ==========================================
 
-numeric_imputer = SimpleImputer(strategy="median")
+preprocessor = ColumnTransformer([
+    ("numeric", numeric_pipeline, numeric_columns),
+    ("categorical", categorical_pipeline, categorical_columns)
+])
 
-categorical_imputer = SimpleImputer(strategy="most_frequent")
+
+# ==========================================
+# 9. CREATE THE MODEL
+# ==========================================
+
+model = Pipeline([
+    ("preprocessor", preprocessor),
+    ("model", RandomForestRegressor(
+        n_estimators=100,
+        random_state=42
+    ))
+])
+
+
+# ==========================================
+# 10. TRAIN THE MODEL
+# ==========================================
+
+model.fit(X_train, y_train)
+
+
+# ==========================================
+# 11. MAKE PREDICTIONS
+# ==========================================
+
+predictions = model.predict(X_test)
+
+
+# ==========================================
+# 12. EVALUATE THE MODEL
+# ==========================================
+
+mae = mean_absolute_error(y_test, predictions)
+
+rmse = mean_squared_error(
+    y_test,
+    predictions
+) ** 0.5
+
+r2 = r2_score(y_test, predictions)
+
+print("MAE:", mae)
+print("RMSE:", rmse)
+print("R2 Score:", r2)
+
+
+# ==========================================
+# 13. STREAMLIT APP
+# ==========================================
+
+st.title("Kevin C George - House Price Prediction")
+
+st.write("House Price Prediction using Machine Learning")
+
+st.write("Model R² Score:", r2)
