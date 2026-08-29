@@ -27,7 +27,6 @@ df = pd.read_csv("train.csv")
 # ==========================================
 
 X = df.drop("SalePrice", axis=1)
-
 y = df["SalePrice"]
 
 
@@ -36,7 +35,6 @@ y = df["SalePrice"]
 # ==========================================
 
 numeric_columns = X.select_dtypes(include=["number"]).columns
-
 categorical_columns = X.select_dtypes(include=["object"]).columns
 
 
@@ -67,7 +65,7 @@ categorical_pipeline = Pipeline([
 
 
 # ==========================================
-# 7. COMBINE THE PROCESSING
+# 7. COMBINE PROCESSING
 # ==========================================
 
 preprocessor = ColumnTransformer([
@@ -77,7 +75,7 @@ preprocessor = ColumnTransformer([
 
 
 # ==========================================
-# 8. CREATE THE MODEL
+# 8. CREATE MODEL
 # ==========================================
 
 model = Pipeline([
@@ -90,21 +88,21 @@ model = Pipeline([
 
 
 # ==========================================
-# 9. TRAIN THE MODEL
+# 9. TRAIN MODEL
 # ==========================================
 
 model.fit(X_train, y_train)
 
 
 # ==========================================
-# 10. MAKE PREDICTIONS
+# 10. MAKE TEST PREDICTIONS
 # ==========================================
 
 predictions = model.predict(X_test)
 
 
 # ==========================================
-# 11. EVALUATE THE MODEL
+# 11. EVALUATE MODEL
 # ==========================================
 
 mae = mean_absolute_error(y_test, predictions)
@@ -125,4 +123,54 @@ st.title("Kevin C George - House Price Prediction")
 
 st.write("House Price Prediction using Machine Learning")
 
+st.write("Model R² Score:", round(r2, 3))
 
+
+# ==========================================
+# 13. USER INPUT
+# ==========================================
+
+st.header("Enter House Details")
+
+user_input = {}
+
+for column in X.columns:
+
+    if column in numeric_columns:
+
+        user_input[column] = st.number_input(
+            column,
+            value=float(X[column].median())
+        )
+
+    else:
+
+        options = X[column].dropna().unique().tolist()
+
+        if len(options) > 0:
+            user_input[column] = st.selectbox(
+                column,
+                options
+            )
+        else:
+            user_input[column] = ""
+
+
+# ==========================================
+# 14. CREATE INPUT DATAFRAME
+# ==========================================
+
+input_data = pd.DataFrame([user_input])
+
+
+# ==========================================
+# 15. PREDICT HOUSE PRICE
+# ==========================================
+
+if st.button("Predict House Price"):
+
+    prediction = model.predict(input_data)
+
+    st.success(
+        f"Predicted House Price: ${prediction[0]:,.2f}"
+    )
