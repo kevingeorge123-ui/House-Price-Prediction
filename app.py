@@ -142,4 +142,4 @@ st.title("Kevin C George - House Price Prediction")
 
 st.write("House Price Prediction using Machine Learning")
 
-st.write("Model R² Score:", r2)
+#st.write("Model R² Score:", r2)
